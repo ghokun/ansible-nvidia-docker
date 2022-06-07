@@ -1,0 +1,37 @@
+---
+- name: Install NVIDIA drivers
+  apt:
+    name: "{{ packages }}"
+    state: present
+    update_cache: yes
+    install_recommends: no
+  vars:
+    packages:
+      - nvidia-driver-510
+      - nvidia-utils-510
+  notify:
+    - Reboot
+
+- name: Add an apt signing key for NVIDIA Docker
+  apt_key:
+    url: https://nvidia.github.io/libnvidia-container/gpgkey
+    state: present
+
+- name: Add apt repository for NVIDIA Docker
+  get_url:
+    url: "https://nvidia.github.io/libnvidia-container/{{ ansible_distribution | lower }}{{ ansible_distribution_version }}/libnvidia-container.list"
+    dest: /etc/apt/sources.list.d/nvidia-container-toolkit.list
+    mode: "0644"
+
+- name: Install NVIDIA Docker 2
+  apt:
+    name: nvidia-docker2
+    state: present
+    update_cache: yes
+
+- name: Update docker daemon.json for nvidia-docker2
+  copy:
+    src: files/daemon.json
+    dest: /etc/docker/daemon.json
+    mode: 0644
+  notify: Restart Docker

@@ -1,0 +1,8 @@
+- name: Reboot
+  reboot:
+    pre_reboot_delay: 0
+
+- name: Restart Docker
+  systemd:
+    state: restarted
+    name: docker
